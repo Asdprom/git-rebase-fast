@@ -7,9 +7,6 @@
 #include <ctime>
 #include <filesystem>
 
-namespace fs = std::filesystem;
-
-
 const git_signature* get_original_signature(git_oid oid, git_repository* repo)
 {
 	git_commit* base_commit = NULL;
@@ -67,10 +64,7 @@ int main(int argc, char* argv[])
 	git_libgit2_init();
 	
 	std::string str_path = std::filesystem::current_path().string();
-
-	char* path = &str_path[0];
-
-	
+	char* path = &str_path[0];	
 
 	int error = git_repository_open(&repo, path);
 	if (error < 0) {
@@ -82,9 +76,6 @@ int main(int argc, char* argv[])
 	git_oid oid;
 	git_reference* test = NULL;
 	git_reference* master = NULL;
-	git_annotated_commit* test_head;
-	git_annotated_commit* master_head;
-
 	git_annotated_commit* commit = NULL;
 
 	git_rebase* rebase = NULL;
@@ -131,13 +122,6 @@ int main(int argc, char* argv[])
 	commit_author = get_original_signature(oid, repo);
 	//******************************************************************
 
-	//Debug:
-	//git_reference_lookup(&test, repo, "refs/heads/test");
-	//git_reference_lookup(&master, repo, "refs/heads/master");
-
-	//git_annotated_commit_from_ref(&test_head, repo, test);
-	//git_annotated_commit_from_ref(&master_head, repo, master);
-
 	if (git_rebase_init(&rebase, repo, NULL, commit, NULL, NULL) < 0)
 	{
 		const git_error* e = git_error_last();
@@ -173,6 +157,7 @@ int main(int argc, char* argv[])
 	*************************************************/
 	git_rebase_finish(rebase, commit_author);
 
+	git_annotated_commit_free(commit);
 	git_reference_free(test);
 	git_reference_free(master);
 	git_rebase_free(rebase);
